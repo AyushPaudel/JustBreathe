@@ -1,0 +1,87 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #0f172a; /* slate-900 */
+  color: #e2e8f0; /* slate-200 */
+  font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
+    sans-serif;
+}
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+/* Reusable layout to match circle.html */
+.container {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.panel {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 24px;
+  backdrop-filter: blur(10px);
+}
+h1 {
+  text-align: center;
+  margin: 0 0 12px;
+  background: linear-gradient(135deg, #fff, #a5b4fc 35%, #38bdf8 70%, #14b8a6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.controls .row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.breathing-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 16px;
+}
+/* Add comfortable vertical spacing in panels */
+.panel .breathing-wrap {
+  margin-bottom: 20px;
+}
+.panel .breathing-circle-wrapper {
+  margin-bottom: 20px;
+}
+.panel .controls {
+  margin-top: 20px;
+}
+.controls > * {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+}
+input[type="range"] {
+  width: 220px;
+}

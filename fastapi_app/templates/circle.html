@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Breathing Circle</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial,
+          sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+      }
+      .container {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 24px;
+        min-height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .panel {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+        padding: 24px;
+        backdrop-filter: blur(10px);
+      }
+      h1 {
+        text-align: center;
+        margin: 0 0 12px;
+        background: linear-gradient(
+          135deg,
+          #fff,
+          #a5b4fc 35%,
+          #38bdf8 70%,
+          #14b8a6
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .breathing-circle-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+      }
+      .breathing-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #38bdf8 60%, #6366f1 100%);
+        box-shadow: 0 0 40px 10px #38bdf888, 0 0 0 4px #6366f144;
+        opacity: 0.6;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        justify-content: center;
+        margin-top: 16px;
+      }
+      label {
+        color: #94a3b8;
+      }
+      select {
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: #0b1220;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="panel">
+        <h1>Breathing Circle</h1>
+        <div class="breathing-circle-wrapper" style="position: relative">
+          <div
+            id="breathingCircle"
+            class="breathing-circle"
+            aria-label="Breathing animation"
+          ></div>
+          <div
+            id="phaseLabel"
+            style="
+              position: absolute;
+              inset: 0;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-weight: 700;
+              color: #e2e8f0;
+              pointer-events: none;
+              mix-blend-mode: screen;
+              text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            "
+          >
+            Inhale
+          </div>
+        </div>
+        <div class="controls">
+          <a href="/select" style="color: #a5b4fc">Change pattern</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (() => {
+        const circle = document.getElementById("breathingCircle");
+        let inhaleMs = 4000;
+        let holdMs = 0;
+        let exhaleMs = 4000;
+        let phase = "inhale";
+        let timerId;
+        const label = document.getElementById("phaseLabel");
+
+        function runCycle() {
+          // inhale
+          phase = "inhale";
+          if (label) label.textContent = "Inhale";
+          circle.style.transition = `width ${inhaleMs}ms ease-in-out, height ${inhaleMs}ms ease-in-out, opacity 300ms ease`;
+          circle.style.width = "160px";
+          circle.style.height = "160px";
+          circle.style.opacity = "0.9";
+          clearTimeout(timerId);
+          timerId = setTimeout(() => {
+            // optional hold (keep size)
+            if (holdMs > 0) {
+              if (label) label.textContent = "Hold";
+              setTimeout(startExhale, holdMs);
+            } else {
+              startExhale();
+            }
+          }, inhaleMs);
+        }
+
+        function startExhale() {
+          phase = "exhale";
+          if (label) label.textContent = "Exhale";
+          circle.style.transition = `width ${exhaleMs}ms ease-in-out, height ${exhaleMs}ms ease-in-out, opacity 300ms ease`;
+          circle.style.width = "60px";
+          circle.style.height = "60px";
+          circle.style.opacity = "0.6";
+          clearTimeout(timerId);
+          timerId = setTimeout(runCycle, exhaleMs);
+        }
+
+        async function loadConfig() {
+          try {
+            const res = await fetch("/api/config");
+            const cfg = await res.json();
+            if (cfg.variant === "three" && cfg.pattern_three) {
+              inhaleMs =
+                Math.max(0, Number(cfg.pattern_three.inhale) || 0) * 1000;
+              holdMs = Math.max(0, Number(cfg.pattern_three.hold) || 0) * 1000;
+              exhaleMs =
+                Math.max(0, Number(cfg.pattern_three.exhale) || 0) * 1000;
+            } else if (cfg.variant === "two" && cfg.pattern_two) {
+              inhaleMs =
+                Math.max(0, Number(cfg.pattern_two.inhale) || 0) * 1000;
+              holdMs = 0;
+              exhaleMs =
+                Math.max(0, Number(cfg.pattern_two.exhale) || 0) * 1000;
+            } else if (cfg.pattern) {
+              // If someone selected box but navigated to circle, just use inhale/exhale from box
+              inhaleMs = Math.max(0, Number(cfg.pattern.inhale) || 0) * 1000;
+              holdMs = 0;
+              exhaleMs = Math.max(0, Number(cfg.pattern.exhale) || 0) * 1000;
+            }
+            clearTimeout(timerId);
+            // initialize small size then start
+            circle.style.width = "60px";
+            circle.style.height = "60px";
+            circle.style.opacity = "0.6";
+            runCycle();
+          } catch (e) {
+            // fallback
+            inhaleMs = 4000;
+            holdMs = 0;
+            exhaleMs = 4000;
+            runCycle();
+          }
+        }
+
+        loadConfig();
+
+        // Optional: respect reduced motion preference
+        const prefersReduced =
+          window.matchMedia &&
+          window.matchMedia("(prefers-reduced-motion: reduce)");
+        if (prefersReduced && prefersReduced.matches) {
+          clearTimeout(timerId);
+          circle.style.transition = "none";
+          circle.style.width = "110px";
+          circle.style.height = "110px";
+          circle.style.opacity = "0.8";
+        }
+      })();
+    </script>
+  </body>
+</html>
