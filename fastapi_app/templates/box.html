@@ -1,7 +1,8 @@
 {% extends "base.html" %} {% block title %}Box Breathing{% endblock %} {% block
 content %}
 <div class="container">
-  <div class="panel">
+  <div class="panel" style="max-width: 900px; position: relative">
+    <div id="cycleCount" class="cycle-badge">0/5</div>
     <h1>Box</h1>
     <div
       id="planMeta"
@@ -16,61 +17,78 @@ content %}
         font-style: italic;
       "
     ></div>
+
     <div class="breathing-wrap">
       <div id="mount"></div>
     </div>
+
+    <div
+      class="controls"
+      id="sessionControls"
+      style="justify-content: center; gap: 12px"
+    >
+      <button id="startBtn">Start</button>
+    </div>
+
+    <button
+      id="audioSettingsBtn"
+      class="floating-settings"
+      title="Audio settings"
+      aria-label="Audio settings"
+    >
+      ⚙️
+    </button>
+    <div class="audio-panel" id="audioPanel" aria-hidden="true">
+      <div class="panel-title">Sound</div>
+      <div class="panel-row">
+        <label
+          style="
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+          "
+        >
+          <span>Breath assistance</span>
+          <input type="checkbox" id="assistOn" checked />
+        </label>
+      </div>
+      <div class="panel-row">
+        <label>
+          Overall volume
+          <input
+            type="range"
+            id="volMaster"
+            min="0"
+            max="1"
+            step="0.01"
+            value="1"
+          />
+        </label>
+      </div>
+      <div class="panel-row">
+        <label>
+          Background music
+          <input
+            type="range"
+            id="volBg"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.3"
+          />
+        </label>
+      </div>
+    </div>
+
     <div class="controls">
-      <a href="/select">Change pattern</a>
-      <a href="/chat">Coach</a>
+      <a href="/">Home</a>
     </div>
   </div>
 </div>
 {% endblock %} {% block scripts %}
-<script src="/static/app.js"></script>
-<script>
-  (async () => {
-    const el = document.getElementById("planMeta");
-    const elQ = document.getElementById("planQuote");
-    function setMeta(name, cycle) {
-      if (!el) return;
-      el.textContent = name && cycle ? `${name} — cycle ${cycle}` : "";
-    }
-    function n(v) {
-      const num = Number(v);
-      return Number.isFinite(num)
-        ? Number.isInteger(num)
-          ? String(num)
-          : String(num)
-        : "0";
-    }
-    const stored = sessionStorage.getItem("breathingPlan");
-    if (stored) {
-      try {
-        const meta = JSON.parse(stored);
-        setMeta(meta.pattern || "Breathing", meta.cycle || "");
-        if (elQ && meta.quote) elQ.textContent = `“${meta.quote}”`;
-        return;
-      } catch {}
-    }
-    // Fallback: derive from backend config
-    try {
-      const res = await fetch("/api/config");
-      const cfg = await res.json();
-      if (cfg.variant === "box" && cfg.pattern) {
-        const c = `${n(cfg.pattern.inhale)}-${n(cfg.pattern.hold1)}-${n(
-          cfg.pattern.exhale
-        )}-${n(cfg.pattern.hold2)}`;
-        setMeta("Box breathing", c);
-      } else if (cfg.variant === "three" && cfg.pattern_three) {
-        const c = `${n(cfg.pattern_three.inhale)}-${n(
-          cfg.pattern_three.hold
-        )}-${n(cfg.pattern_three.exhale)}`;
-        setMeta("Inhale-Hold-Exhale", c);
-      } else if (cfg.variant === "two" && cfg.pattern_two) {
-        const c = `${n(cfg.pattern_two.inhale)}-${n(cfg.pattern_two.exhale)}`;
-        setMeta("Equal breathing", c);
-      }
-    } catch {}
-  })();
-</script>
+<script src="/static/js/pages/box-meta.js"></script>
+<script src="/static/js/pages/box-run.js"></script>
+<script src="/static/js/pages/box-audio.js"></script>
+<script src="/static/js/pages/box-session.js"></script>
 {% endblock %}

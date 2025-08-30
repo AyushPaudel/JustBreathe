@@ -3,10 +3,32 @@ body {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: #0f172a; /* slate-900 */
+  /* Default animated background for all pages */
+  background: #0f172a url("/static/img/Home_bg.gif") center/cover no-repeat
+    fixed;
   color: #e2e8f0; /* slate-200 */
   font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial,
     sans-serif;
+  box-sizing: border-box;
+}
+/* Deep Focus page override */
+body.bg-relaxing {
+  background-image: url("/static/img/Deep_focus.gif");
+}
+/* Deep Focus layout: avoid oversized panel while keeping nice centering */
+body.bg-relaxing .container {
+  min-height: 100vh; /* keep vertical centering on tall screens */
+  align-items: center;
+}
+body.bg-relaxing .panel {
+  max-width: 820px;
+  max-height: 80vh; /* slightly smaller than default to avoid feeling too tall */
+  overflow: auto;
+}
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
 }
 .wrap {
   display: flex;
@@ -19,22 +41,36 @@ body {
   max-width: 640px;
   margin: 0 auto;
   padding: 24px;
-  min-height: 100vh;
+  /* allow content to define height; pages that need full height can opt-in inline */
+  min-height: auto;
   display: flex;
-  align-items: center;
   justify-content: center;
 }
 .panel {
   width: 100%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 15, 30, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 16px;
-  padding: 24px;
+  padding: 20px 20px 24px;
+  padding-top: 56px; /* headroom for top-right gear + top-left cycle badge */
+  backdrop-filter: blur(10px);
+  position: relative; /* anchor for settings btn/panel */
+  max-height: 88vh;
+  overflow: auto;
+}
+
+/* Match chat panel styling to .panel for consistent contrast */
+.panel_breathing_coach {
+  background: rgba(10, 15, 30, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  padding: 20px 20px 24px;
   backdrop-filter: blur(10px);
 }
+
 h1 {
   text-align: center;
-  margin: 0 0 12px;
+  margin: 0 0 8px;
   background: linear-gradient(135deg, #fff, #a5b4fc 35%, #38bdf8 70%, #14b8a6);
   -webkit-background-clip: text;
   background-clip: text;
@@ -51,28 +87,34 @@ h1 {
   gap: 12px;
   align-items: center;
 }
+.controls#audioControls {
+  margin-top: 8px;
+}
+.controls#audioControls label {
+  color: #e2e8f0;
+}
 .breathing-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(10, 15, 30, 0.55);
   border-radius: 12px;
   padding: 16px;
 }
 /* Add comfortable vertical spacing in panels */
 .panel .breathing-wrap {
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 .panel .breathing-circle-wrapper {
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 .panel .controls {
-  margin-top: 20px;
+  margin-top: 14px;
 }
 .controls > * {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(10, 15, 30, 0.55);
   color: #e2e8f0;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 12px;
   padding: 10px 12px;
 }
@@ -84,6 +126,84 @@ label {
 }
 input[type="range"] {
   width: 220px;
+}
+
+/* Audio settings UI */
+.floating-settings {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  z-index: 5;
+}
+.floating-settings:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.audio-panel {
+  position: absolute;
+  right: 12px;
+  top: 56px;
+  width: 280px;
+  background: rgba(10, 15, 30, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 5;
+}
+.audio-panel[aria-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+}
+.audio-panel .panel-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #cbd5e1;
+}
+.audio-panel .panel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 8px 0;
+}
+.audio-panel .panel-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  color: #94a3b8;
+}
+.audio-panel input[type="range"] {
+  width: 100%;
+}
+
+/* Session cycle badge */
+.cycle-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: auto; /* ensure it anchors to the left */
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #e2e8f0;
+  font-weight: 700;
+  z-index: 6; /* above panel content */
 }
 
 /* Chat UI */
@@ -151,4 +271,110 @@ input[type="range"] {
   margin-top: 8px;
   color: #94a3b8;
   font-size: 0.9rem;
+}
+
+/* Deep Focus controls: stabilize button widths to avoid layout shifts */
+.df-controls button {
+  min-width: 88px; /* Start/Stop, Pause/Play, Reset fit without reflow */
+}
+
+/* Home: option cards */
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 8px 0 4px;
+}
+.option-card {
+  display: block;
+  text-align: left;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(10, 15, 30, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease,
+    border-color 0.12s ease;
+}
+
+a.option-card {
+  text-decoration: none;
+}
+.option-card:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+.option-card.expandable {
+  position: relative;
+  overflow: hidden;
+}
+.option-card .expand {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease;
+}
+.option-card.is-open .expand {
+  /* allow the inner content height; large max to accommodate form */
+  max-height: 500px;
+}
+.option-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.option-sub {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+/* Deep Focus form */
+.df-form {
+  margin-top: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+.df-form.within-card {
+  /* when nested inside card, remove extra border to feel unified */
+  border: 0;
+  padding: 12px 0 0;
+  margin-top: 8px;
+  background: transparent;
+}
+.df-heading {
+  margin: 0 0 10px;
+  color: #cbd5e1;
+}
+.df-form form {
+  display: grid;
+  gap: 12px;
+}
+.df-form .field {
+  display: grid;
+  gap: 6px;
+}
+.df-form .field label {
+  color: #94a3b8;
+}
+.df-form input[type="text"],
+.df-form select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.df-form .actions {
+  display: flex;
+  justify-content: center;
+}
+.df-form .actions button {
+  background: rgba(56, 189, 248, 0.25);
+  color: #e2e8f0;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 12px;
+  padding: 10px 14px;
 }

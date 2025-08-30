@@ -14,15 +14,13 @@ load_dotenv(dotenv_path=BASE_DIR / ".env")
 
 app = FastAPI(title="Box Breathing (FastAPI)")
 
-# Static and templates
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 
 @app.get("/", response_class=HTMLResponse)
 def index(request: Request):
-    # Start at chatbot per the new flow
-    return templates.TemplateResponse("chat.html", {"request": request})
+    return templates.TemplateResponse("home.html", {"request": request})
 
 
 @app.get("/select", response_class=HTMLResponse)
@@ -48,6 +46,11 @@ def chat_page(request: Request):
 @app.get("/focus", response_class=HTMLResponse)
 def focus_page(request: Request):
     return templates.TemplateResponse("focus.html", {"request": request})
+
+
+@app.get("/deep-focus", response_class=HTMLResponse)
+def deep_focus_page(request: Request):
+    return templates.TemplateResponse("deep_focus.html", {"request": request})
 
 
 @app.get("/healthz")

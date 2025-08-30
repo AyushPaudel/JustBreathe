@@ -56,12 +56,8 @@ def get_box_pattern():
     return p
 
 
-class BoxPatternUpdate(Pattern):
-    pass
-
-
 @router.post("/patterns/box")
-def set_box_pattern(p: BoxPatternUpdate):
+def set_box_pattern(p: Pattern):
     global CONFIG
     if p.total_seconds <= 0:
         raise HTTPException(status_code=400, detail="pattern total must be > 0")
@@ -79,12 +75,8 @@ def get_three_pattern():
     return p
 
 
-class ThreePatternUpdate(Config.ThreePhasePattern):
-    pass
-
-
 @router.post("/patterns/three")
-def set_three_pattern(p: ThreePatternUpdate):
+def set_three_pattern(p: Config.ThreePhasePattern):
     global CONFIG
     if p.total_seconds <= 0:
         raise HTTPException(status_code=400, detail="pattern total must be > 0")
@@ -102,12 +94,8 @@ def get_two_pattern():
     return p
 
 
-class TwoPatternUpdate(Config.TwoPhasePattern):
-    pass
-
-
 @router.post("/patterns/two")
-def set_two_pattern(p: TwoPatternUpdate):
+def set_two_pattern(p: Config.TwoPhasePattern):
     global CONFIG
     if p.total_seconds <= 0:
         raise HTTPException(status_code=400, detail="pattern total must be > 0")

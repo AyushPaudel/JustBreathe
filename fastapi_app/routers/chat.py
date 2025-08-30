@@ -20,10 +20,6 @@ async def chat(req: ChatRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-class ConversationRequest(ChatRequest):
-    messages: list[str]
-
-
 @router.post("/chatbot")
 async def chatbot(messages: list[str] = Body(..., embed=True)):
     try:

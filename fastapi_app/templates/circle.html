@@ -1,265 +1,136 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Breathing Circle</title>
-    <style>
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-          sans-serif;
-        background: #0f172a;
-        color: #e2e8f0;
-      }
-      .container {
-        max-width: 640px;
-        margin: 0 auto;
-        padding: 24px;
-        min-height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .panel {
-        width: 100%;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 16px;
-        padding: 24px;
-        backdrop-filter: blur(10px);
-      }
-      h1 {
+{% extends "base.html" %} {% block title %}Breathing Circle{% endblock %} {%
+block content %}
+<div class="container">
+  <div class="panel" style="max-width: 900px; position: relative">
+    <h1>Breathing Circle</h1>
+    <div
+      id="planMeta"
+      style="text-align: center; color: #94a3b8; margin-bottom: 8px"
+    ></div>
+    <div
+      id="planQuote"
+      style="
         text-align: center;
-        margin: 0 0 12px;
-        background: linear-gradient(
-          135deg,
-          #fff,
-          #a5b4fc 35%,
-          #38bdf8 70%,
-          #14b8a6
-        );
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-      }
-      .breathing-circle-wrapper {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 200px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.06);
-      }
-      .breathing-circle {
-        width: 60px;
-        height: 60px;
+        color: #e2e8f0;
+        margin: 4px 0 12px;
+        font-style: italic;
+      "
+    ></div>
+
+    <div
+      class="breathing-circle-wrapper"
+      style="
+        position: relative;
+        width: 240px;
+        height: 240px;
         border-radius: 50%;
-        background: radial-gradient(circle, #38bdf8 60%, #6366f1 100%);
-        box-shadow: 0 0 40px 10px #38bdf888, 0 0 0 4px #6366f144;
-        opacity: 0.6;
-      }
-      .controls {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        justify-content: center;
-        margin-top: 16px;
-      }
-      label {
-        color: #94a3b8;
-      }
-      select {
-        padding: 10px 12px;
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        background: #0b1220;
-        color: #fff;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="panel">
-        <h1>Breathing Circle</h1>
-        <div
-          id="planMeta"
-          style="text-align: center; color: #94a3b8; margin-bottom: 8px"
-        ></div>
-        <div
-          id="planQuote"
-          style="
-            text-align: center;
-            color: #e2e8f0;
-            margin: 4px 0 12px;
-            font-style: italic;
-          "
-        ></div>
-        <div class="breathing-circle-wrapper" style="position: relative">
-          <div
-            id="breathingCircle"
-            class="breathing-circle"
-            aria-label="Breathing animation"
-          ></div>
-          <div
-            id="phaseLabel"
-            style="
-              position: absolute;
-              inset: 0;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-weight: 700;
-              color: #e2e8f0;
-              pointer-events: none;
-              mix-blend-mode: screen;
-              text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-            "
-          >
-            Inhale
-          </div>
-        </div>
-        <div class="controls">
-          <a href="/select" style="color: #a5b4fc">Change pattern</a>
-          <a href="/chat" style="color: #a5b4fc">Coach</a>
-        </div>
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.06);
+        box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.12);
+      "
+    >
+      <div
+        id="breathingCircle"
+        class="breathing-circle"
+        aria-label="Breathing animation"
+        style="
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          background: radial-gradient(circle, #38bdf8 60%, #6366f1 100%);
+          box-shadow: 0 0 40px 10px #38bdf888, 0 0 0 4px #6366f144;
+          opacity: 0.6;
+        "
+      ></div>
+      <div
+        id="phaseLabel"
+        style="
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          color: #e2e8f0;
+          pointer-events: none;
+          mix-blend-mode: screen;
+          text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        "
+      >
+        Inhale
       </div>
     </div>
 
-    <script>
-      (() => {
-        const circle = document.getElementById("breathingCircle");
-        let inhaleMs = 4000;
-        let holdMs = 0;
-        let exhaleMs = 4000;
-        let phase = "inhale";
-        let timerId;
-        const label = document.getElementById("phaseLabel");
+    <button
+      id="audioSettingsBtn"
+      class="floating-settings"
+      title="Audio settings"
+      aria-label="Audio settings"
+    >
+      ⚙️
+    </button>
+    <div id="cycleCount" class="cycle-badge">0/5</div>
+    <div class="audio-panel" id="audioPanel" aria-hidden="true">
+      <div class="panel-title">Sound</div>
+      <div class="panel-row">
+        <label
+          style="
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+          "
+        >
+          <span>Breath assistance</span>
+          <input type="checkbox" id="assistOn" checked />
+        </label>
+      </div>
+      <div class="panel-row">
+        <label>
+          Overall volume
+          <input
+            type="range"
+            id="volMaster"
+            min="0"
+            max="1"
+            step="0.01"
+            value="1"
+          />
+        </label>
+      </div>
+      <div class="panel-row">
+        <label>
+          Background music
+          <input
+            type="range"
+            id="volBg"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.3"
+          />
+        </label>
+      </div>
+    </div>
 
-        function runCycle() {
-          // inhale
-          phase = "inhale";
-          if (label) label.textContent = "Inhale";
-          circle.style.transition = `width ${inhaleMs}ms ease-in-out, height ${inhaleMs}ms ease-in-out, opacity 300ms ease`;
-          circle.style.width = "160px";
-          circle.style.height = "160px";
-          circle.style.opacity = "0.9";
-          clearTimeout(timerId);
-          timerId = setTimeout(() => {
-            // optional hold (keep size)
-            if (holdMs > 0) {
-              if (label) label.textContent = "Hold";
-              setTimeout(startExhale, holdMs);
-            } else {
-              startExhale();
-            }
-          }, inhaleMs);
-        }
-
-        function startExhale() {
-          phase = "exhale";
-          if (label) label.textContent = "Exhale";
-          circle.style.transition = `width ${exhaleMs}ms ease-in-out, height ${exhaleMs}ms ease-in-out, opacity 300ms ease`;
-          circle.style.width = "60px";
-          circle.style.height = "60px";
-          circle.style.opacity = "0.6";
-          clearTimeout(timerId);
-          timerId = setTimeout(runCycle, exhaleMs);
-        }
-
-        async function loadConfig() {
-          try {
-            const res = await fetch("/api/config");
-            const cfg = await res.json();
-            // show plan meta from sessionStorage if available, else infer
-            try {
-              const el = document.getElementById("planMeta");
-              const elQ = document.getElementById("planQuote");
-              function n(v) {
-                const num = Number(v);
-                return Number.isFinite(num)
-                  ? Number.isInteger(num)
-                    ? String(num)
-                    : String(num)
-                  : "0";
-              }
-              const stored = sessionStorage.getItem("breathingPlan");
-              if (stored) {
-                const meta = JSON.parse(stored);
-                if (el)
-                  el.textContent = `${meta.pattern || "Breathing"} — cycle ${
-                    meta.cycle || ""
-                  }`;
-                if (elQ && meta.quote) elQ.textContent = `“${meta.quote}”`;
-              } else if (el) {
-                if (cfg.variant === "three" && cfg.pattern_three) {
-                  el.textContent = `Inhale-Hold-Exhale — cycle ${n(
-                    cfg.pattern_three.inhale
-                  )}-${n(cfg.pattern_three.hold)}-${n(
-                    cfg.pattern_three.exhale
-                  )}`;
-                } else if (cfg.variant === "two" && cfg.pattern_two) {
-                  el.textContent = `Equal breathing — cycle ${n(
-                    cfg.pattern_two.inhale
-                  )}-${n(cfg.pattern_two.exhale)}`;
-                } else if (cfg.pattern) {
-                  el.textContent = `Box breathing — cycle ${n(
-                    cfg.pattern.inhale
-                  )}-${n(cfg.pattern.hold1)}-${n(cfg.pattern.exhale)}-${n(
-                    cfg.pattern.hold2
-                  )}`;
-                }
-              }
-            } catch {}
-            if (cfg.variant === "three" && cfg.pattern_three) {
-              inhaleMs =
-                Math.max(0, Number(cfg.pattern_three.inhale) || 0) * 1000;
-              holdMs = Math.max(0, Number(cfg.pattern_three.hold) || 0) * 1000;
-              exhaleMs =
-                Math.max(0, Number(cfg.pattern_three.exhale) || 0) * 1000;
-            } else if (cfg.variant === "two" && cfg.pattern_two) {
-              inhaleMs =
-                Math.max(0, Number(cfg.pattern_two.inhale) || 0) * 1000;
-              holdMs = 0;
-              exhaleMs =
-                Math.max(0, Number(cfg.pattern_two.exhale) || 0) * 1000;
-            } else if (cfg.pattern) {
-              // If someone selected box but navigated to circle, just use inhale/exhale from box
-              inhaleMs = Math.max(0, Number(cfg.pattern.inhale) || 0) * 1000;
-              holdMs = 0;
-              exhaleMs = Math.max(0, Number(cfg.pattern.exhale) || 0) * 1000;
-            }
-            clearTimeout(timerId);
-            // initialize small size then start
-            circle.style.width = "60px";
-            circle.style.height = "60px";
-            circle.style.opacity = "0.6";
-            runCycle();
-          } catch (e) {
-            // fallback
-            inhaleMs = 4000;
-            holdMs = 0;
-            exhaleMs = 4000;
-            runCycle();
-          }
-        }
-
-        loadConfig();
-
-        // Optional: respect reduced motion preference
-        const prefersReduced =
-          window.matchMedia &&
-          window.matchMedia("(prefers-reduced-motion: reduce)");
-        if (prefersReduced && prefersReduced.matches) {
-          clearTimeout(timerId);
-          circle.style.transition = "none";
-          circle.style.width = "110px";
-          circle.style.height = "110px";
-          circle.style.opacity = "0.8";
-        }
-      })();
-    </script>
-  </body>
-</html>
+    <div
+      class="controls"
+      id="sessionControls"
+      style="justify-content: center; gap: 12px"
+    >
+      <button id="startBtn">Start</button>
+    </div>
+    <div class="controls">
+      <a href="/">Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="/static/js/pages/circle-meta.js"></script>
+<script src="/static/js/pages/circle-audio.js"></script>
+<script src="/static/js/pages/circle-run.js"></script>
+{% endblock %}
