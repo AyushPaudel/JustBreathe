@@ -1,0 +1,32 @@
+{% extends "base.html" %} {% block title %}Breathing Coach Chat{% endblock %} {%
+block content %}
+<div class="container">
+  <div class="panel chat-panel" style="max-width: 720px">
+    <h1>Breathing Coach</h1>
+    <div
+      id="chat"
+      class="chat-window"
+      aria-live="polite"
+      aria-label="Chat messages"
+    ></div>
+    <form id="chat-form" class="chat-input" autocomplete="off">
+      <input
+        id="chat-text"
+        type="text"
+        placeholder="Type a message..."
+        aria-label="Message"
+      />
+      <button id="chat-send" type="submit">Send</button>
+    </form>
+    <p class="chat-hint">
+      Tip: Ask for patterns like “Help me relax” or “Suggest a sleep routine”.
+    </p>
+    <div class="controls" style="justify-content: space-between">
+      <span></span>
+      <button id="plan-btn" type="button">Get breathing plan →</button>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="/static/chat.js"></script>
+{% endblock %}

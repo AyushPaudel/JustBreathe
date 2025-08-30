@@ -84,6 +84,19 @@
     <div class="container">
       <div class="panel">
         <h1>Breathing Circle</h1>
+        <div
+          id="planMeta"
+          style="text-align: center; color: #94a3b8; margin-bottom: 8px"
+        ></div>
+        <div
+          id="planQuote"
+          style="
+            text-align: center;
+            color: #e2e8f0;
+            margin: 4px 0 12px;
+            font-style: italic;
+          "
+        ></div>
         <div class="breathing-circle-wrapper" style="position: relative">
           <div
             id="breathingCircle"
@@ -110,6 +123,7 @@
         </div>
         <div class="controls">
           <a href="/select" style="color: #a5b4fc">Change pattern</a>
+          <a href="/chat" style="color: #a5b4fc">Coach</a>
         </div>
       </div>
     </div>
@@ -159,6 +173,46 @@
           try {
             const res = await fetch("/api/config");
             const cfg = await res.json();
+            // show plan meta from sessionStorage if available, else infer
+            try {
+              const el = document.getElementById("planMeta");
+              const elQ = document.getElementById("planQuote");
+              function n(v) {
+                const num = Number(v);
+                return Number.isFinite(num)
+                  ? Number.isInteger(num)
+                    ? String(num)
+                    : String(num)
+                  : "0";
+              }
+              const stored = sessionStorage.getItem("breathingPlan");
+              if (stored) {
+                const meta = JSON.parse(stored);
+                if (el)
+                  el.textContent = `${meta.pattern || "Breathing"} — cycle ${
+                    meta.cycle || ""
+                  }`;
+                if (elQ && meta.quote) elQ.textContent = `“${meta.quote}”`;
+              } else if (el) {
+                if (cfg.variant === "three" && cfg.pattern_three) {
+                  el.textContent = `Inhale-Hold-Exhale — cycle ${n(
+                    cfg.pattern_three.inhale
+                  )}-${n(cfg.pattern_three.hold)}-${n(
+                    cfg.pattern_three.exhale
+                  )}`;
+                } else if (cfg.variant === "two" && cfg.pattern_two) {
+                  el.textContent = `Equal breathing — cycle ${n(
+                    cfg.pattern_two.inhale
+                  )}-${n(cfg.pattern_two.exhale)}`;
+                } else if (cfg.pattern) {
+                  el.textContent = `Box breathing — cycle ${n(
+                    cfg.pattern.inhale
+                  )}-${n(cfg.pattern.hold1)}-${n(cfg.pattern.exhale)}-${n(
+                    cfg.pattern.hold2
+                  )}`;
+                }
+              }
+            } catch {}
             if (cfg.variant === "three" && cfg.pattern_three) {
               inhaleMs =
                 Math.max(0, Number(cfg.pattern_three.inhale) || 0) * 1000;
