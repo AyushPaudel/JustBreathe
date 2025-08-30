@@ -1,0 +1,61 @@
+{% extends "base.html" %} {% block title %}Welcome · JustBreathe{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="panel" style="max-width: 720px">
+    <h1>JustBreathe</h1>
+
+    <div class="option-grid">
+      <a class="option-card" href="/chat">
+        <div class="option-title">Coach</div>
+        <div class="option-sub">Guided conversation</div>
+      </a>
+      <a class="option-card" href="/select">
+        <div class="option-title">Customize</div>
+        <div class="option-sub">Choose your breathing</div>
+      </a>
+      <div
+        id="deepFocusCard"
+        class="option-card expandable"
+        tabindex="0"
+        role="button"
+        aria-expanded="false"
+      >
+        <div class="option-title">Deep Focus</div>
+        <div class="option-sub">Exit your Distractions</div>
+        <div class="expand" aria-hidden="true">
+          <div class="df-form within-card">
+            <h3 class="df-heading">Deep Focus</h3>
+            <form id="deepFocusForm">
+              <div class="field">
+                <label for="dfTask">Task at hand</label>
+                <input
+                  type="text"
+                  id="dfTask"
+                  placeholder="e.g., Write project report"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label for="dfNoise">White noise</label>
+                <select id="dfNoise">
+                  <option value="birds-chirping-calm.mp3">
+                    Birds — calm (default)
+                  </option>
+                  <option value="rain-and-birds.mp3">Rain + birds</option>
+                  <option value="water-noises.mp3">Water stream</option>
+                  <option value="whitenoise.mp3">White noise</option>
+                </select>
+              </div>
+              <div class="actions">
+                <button type="submit">Start Deep Focus</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="/static/js/pages/home.js"></script>
+{% endblock %}

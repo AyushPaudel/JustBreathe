@@ -41,6 +41,20 @@ Open http://127.0.0.1:8000/select to choose a pattern and durations. You’ll be
 - POST /api/patterns/three — { inhale, hold, exhale }
 - POST /api/patterns/two — { inhale, exhale }
 
+## Chatbot (Phase 2)
+
+There is a minimal coach chat at `/chat`.
+
+- Backend endpoint: `POST /api/chat` with `{ messages: [{ role, content }], model?, temperature?, max_tokens? }`
+- If `OPENAI_API_KEY` is set in `fastapi_app/.env`, responses are generated via OpenAI Chat Completions.
+- If not set, the server returns a small, offline “coach” fallback with simple breathing guidance.
+
+Setup:
+
+1. Copy `.env.example` to `.env` in `fastapi_app/` and set your key
+2. Install deps from `fastapi_app/requirements.txt` (includes httpx and python-dotenv)
+3. Start the app and open `/chat`
+
 ## Credits
 
 Inspired by the box-breathing widget idea (originally popularized in community examples). This project packages the concept into a minimal FastAPI app with a clean theme and simple APIs.

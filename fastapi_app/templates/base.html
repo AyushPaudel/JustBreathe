@@ -7,9 +7,10 @@
     <link rel="stylesheet" href="/static/styles.css" />
     {% block head_extra %}{% endblock %}
   </head>
-  <body>
+  <body class="{% block body_class %}{% endblock %}">
     <div class="wrap">{% block content %}{% endblock %}</div>
-    <script src="/static/box-breathing.js"></script>
+    <script src="/static/js/audio-engine.js"></script>
+    <script src="/static/js/box-breathing.js"></script>
     {% block scripts %}{% endblock %}
   </body>
 </html>

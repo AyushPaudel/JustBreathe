@@ -15,6 +15,12 @@
     .bb-in{animation:bb-in var(--bb-time) infinite cubic-bezier(0.2,0,0.8,1)}
     .bb-hold{animation:bb-hold var(--bb-time) infinite cubic-bezier(0.2,0,0.8,1)}
     .bb-out{animation:bb-out var(--bb-time) infinite cubic-bezier(0.2,0,0.8,1)}
+  /* Pause all animations until running */
+  .bb-root:not(.bb-running) .bb-in,
+  .bb-root:not(.bb-running) .bb-out,
+  .bb-root:not(.bb-running) .bb-hold,
+  .bb-root:not(.bb-running) .bb-fill,
+  .bb-root:not(.bb-running) .bb-dot { animation-play-state: paused; }
   /* Start with inhale instead of hold */
   @keyframes bb-fill{0%{height:0}25%{height:100%}50%{height:100%}75%{height:0}100%{height:0}}
   @keyframes bb-dot{0%{left:calc(0% + 1px);top:calc(100% - 1px)}25%{left:calc(0% + 1px);top:calc(0% + 1px)}50%{left:calc(100% - 1px);top:calc(0% + 1px)}75%{left:calc(100% - 1px);top:calc(100% - 1px)}100%{left:calc(0% + 1px);top:calc(100% - 1px)}}
@@ -61,7 +67,8 @@
 
     const guide = document.createElement("div");
     guide.className = "bb-guide";
-    guide.style.opacity = options.showGuide ? "1" : "0";
+    // Do not show guide until session is started
+    guide.style.display = "none";
     const label = document.createElement("div");
     label.className = "bb-label";
     label.textContent = "";
@@ -79,6 +86,13 @@
     box.append(fill, dot, guide, label);
     root.append(box);
     mount.append(root);
+
+    // Disable CSS keyframe animations until explicitly started
+    fill.style.animation = "none";
+    dot.style.animation = "none";
+
+    // run control
+    let running = false;
 
     // simple mode state (two/three): JS-driven fill animation
     let simpleTimer1 = null;
@@ -101,37 +115,84 @@
       boxLabelTimers = [];
     }
 
-    function startBoxLabels() {
+    function dispatchPhase(name, seconds) {
+      try {
+        root.dispatchEvent(
+          new CustomEvent("bb:phase", { detail: { phase: name, seconds } })
+        );
+      } catch {}
+    }
+    // JS-driven box cycle to align fill and dot exactly to phase durations
+    function startBoxCycle() {
       if (!boxPhases) return;
+      if (!running) return;
       clearBoxLabelTimers();
-      // Use JS-driven label cycles to prevent overlap; hide CSS guide labels
       guide.style.display = "none";
-      const inh = Math.max(0, Number(boxPhases.inhale || 0)) * 1000;
-      const h1 = Math.max(0, Number(boxPhases.hold1 || 0)) * 1000;
-      const ex = Math.max(0, Number(boxPhases.exhale || 0)) * 1000;
-      const h2 = Math.max(0, Number(boxPhases.hold2 || 0)) * 1000;
+      // disable CSS animations for both fill and dot
+      fill.style.animation = "none";
+      dot.style.animation = "none";
+
+      const inh = Math.max(0, Number(boxPhases.inhale || 0));
+      const h1 = Math.max(0, Number(boxPhases.hold1 || 0));
+      const ex = Math.max(0, Number(boxPhases.exhale || 0));
+      const h2 = Math.max(0, Number(boxPhases.hold2 || 0));
+
+      // helper to set dot position with transition over time t (s)
+      function moveDot(xPct, yPct, t) {
+        dot.style.transition = `left ${t}s linear, top ${t}s linear`;
+        dot.style.left = `calc(${xPct}% + 1px)`;
+        dot.style.top = `calc(${yPct}% - 1px)`;
+      }
 
       function cycle() {
-        // Inhale
+        if (!running) return;
+        // Start at bottom-left explicitly
+        if (!dot.style.left) {
+          dot.style.transition = "none";
+          dot.style.left = "calc(0% + 1px)";
+          dot.style.top = "calc(100% - 1px)";
+        }
+        // Inhale: label and fill up
         label.textContent = "Inhale";
+        dispatchPhase("inhale", inh);
+        fill.style.transition = `height ${inh}s cubic-bezier(0.2,0,0.8,1)`;
+        void fill.offsetHeight; // reflow
+        fill.style.height = "100%";
+        // Move dot up left edge to top-left
+        moveDot(0, 0, inh);
+
         boxLabelTimers.push(
           setTimeout(() => {
-            // Hold 1
+            if (!running) return;
+            // Hold 1: across top edge
             label.textContent = h1 > 0 ? "Hold" : "Inhale";
+            if (h1 > 0) dispatchPhase("hold", h1);
+            moveDot(100, 0, h1);
+
             boxLabelTimers.push(
               setTimeout(() => {
-                // Exhale
+                if (!running) return;
+                // Exhale: down right edge
                 label.textContent = "Exhale";
+                dispatchPhase("exhale", ex);
+                fill.style.transition = `height ${ex}s cubic-bezier(0.2,0,0.8,1)`;
+                void fill.offsetHeight;
+                fill.style.height = "0%";
+                moveDot(100, 100, ex);
+
                 boxLabelTimers.push(
                   setTimeout(() => {
-                    // Hold 2
+                    if (!running) return;
+                    // Hold 2: along bottom edge
                     label.textContent = h2 > 0 ? "Hold" : "Exhale";
-                    boxLabelTimers.push(setTimeout(cycle, h2));
-                  }, ex)
+                    if (h2 > 0) dispatchPhase("hold", h2);
+                    moveDot(0, 100, h2);
+                    boxLabelTimers.push(setTimeout(cycle, h2 * 1000));
+                  }, ex * 1000)
                 );
-              }, h1)
+              }, h1 * 1000)
             );
-          }, inh)
+          }, inh * 1000)
         );
       }
       cycle();
@@ -139,6 +200,7 @@
 
     function startSimpleCycle() {
       if (!phases) return;
+      if (!running) return;
       clearSimpleTimers();
       // disable CSS keyframe animation for fill
       fill.style.animation = "none";
@@ -148,27 +210,32 @@
       const hold = currentVariant === "three" ? Number(phases.hold || 0) : 0;
 
       function cycleOnce() {
+        if (!running) return;
         // Inhale: to 100%
         fill.style.transition = `height ${inhale}s cubic-bezier(0.2,0,0.8,1)`;
         // trigger reflow to apply transition when value changes
         void fill.offsetHeight;
         fill.style.height = "100%";
+        dispatchPhase("inhale");
 
         // After inhale, optionally hold
         simpleTimer1 = setTimeout(() => {
           const afterHold = () => {
+            if (!running) return;
             // Exhale: back to 0%
             fill.style.transition = `height ${exhale}s cubic-bezier(0.2,0,0.8,1)`;
             void fill.offsetHeight;
             fill.style.height = "0%";
+            dispatchPhase("exhale");
 
             // Loop after exhale
             simpleTimer2 = setTimeout(() => {
-              if (currentVariant !== "box") cycleOnce();
+              if (running && currentVariant !== "box") cycleOnce();
             }, exhale * 1000);
           };
 
           if (hold > 0) {
+            dispatchPhase("hold");
             simpleTimerLoop = setTimeout(afterHold, hold * 1000);
           } else {
             afterHold();
@@ -182,6 +249,9 @@
     }
 
     return {
+      getRoot() {
+        return root;
+      },
       setCycleSeconds(s) {
         options.cycleSeconds = s;
         root.style.setProperty("--bb-time", s + "s");
@@ -208,29 +278,57 @@
         if (variant === "box") {
           clearSimpleTimers();
           clearBoxLabelTimers();
-          // restore CSS animation
-          fill.style.animation = "";
-          // reset to baseline so CSS keyframes take over
-          fill.style.transition = "";
-          fill.style.height = "";
-          // restart labels if durations provided
-          if (boxPhases) startBoxLabels();
+          // Use JS-driven cycle for precise timing with provided boxPhases
+          // If no phases yet, keep a safe baseline
+          if (boxPhases) {
+            if (running) startBoxCycle();
+          } else {
+            // keep animations disabled until start()
+            fill.style.animation = "none";
+            fill.style.transition = "";
+            fill.style.height = "";
+          }
         } else {
           // ensure circle shape for non-box handled by caller via setShape
           clearBoxLabelTimers();
-          guide.style.display = options.showGuide ? "grid" : "none";
+          // show guide only when running and user wants it
+          guide.style.display = running && options.showGuide ? "grid" : "none";
           label.textContent = "";
-          startSimpleCycle();
+          if (running) startSimpleCycle();
         }
       },
       setPhases(p, variant) {
         phases = p || phases;
         if (variant) this.setVariant(variant);
-        if (currentVariant !== "box") startSimpleCycle();
+        if (running && currentVariant !== "box") startSimpleCycle();
       },
       setBoxPhases(p) {
         boxPhases = p || boxPhases;
-        if (currentVariant === "box") startBoxLabels();
+        if (running && currentVariant === "box") startBoxCycle();
+      },
+      start() {
+        if (running) return;
+        running = true;
+        root.classList.add("bb-running");
+        // kick off based on current variant
+        if (currentVariant === "box") {
+          // guide stays hidden for box
+          startBoxCycle();
+        } else {
+          // show guide if enabled
+          guide.style.display = options.showGuide ? "grid" : "none";
+          startSimpleCycle();
+        }
+      },
+      stop() {
+        if (!running) return;
+        running = false;
+        root.classList.remove("bb-running");
+        clearSimpleTimers();
+        clearBoxLabelTimers();
+        // keep current visual state; no auto reset
+        // hide guide when stopped to avoid passive CSS animations
+        guide.style.display = "none";
       },
     };
   }

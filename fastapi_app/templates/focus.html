@@ -1,0 +1,54 @@
+{% extends "base.html" %} {% block title %}Focused Work{% endblock %} {% block
+content %}
+<div class="container">
+  <div class="panel" style="max-width: 720px">
+    <h1>Focused Work</h1>
+    <div id="focusTimer" class="focus-wrap" aria-live="polite">
+      <div
+        id="sessionLabel"
+        style="text-align: center; color: #94a3b8; margin-bottom: 6px"
+      >
+        Focus
+      </div>
+      <div
+        id="timeLeft"
+        style="
+          font-size: 56px;
+          text-align: center;
+          font-weight: 700;
+          margin-bottom: 8px;
+        "
+      >
+        25:00
+      </div>
+      <div class="controls" style="justify-content: center">
+        <button id="startBtn" type="button">Start</button>
+        <button id="pauseBtn" type="button">Pause</button>
+        <button id="resetBtn" type="button">Reset</button>
+      </div>
+      <div class="controls" style="justify-content: center; margin-top: 8px">
+        <label
+          >Focus (min) <input id="focusMin" type="number" min="1" value="25"
+        /></label>
+        <label
+          >Short break (min)
+          <input id="shortMin" type="number" min="1" value="5"
+        /></label>
+        <label
+          >Long break (min)
+          <input id="longMin" type="number" min="1" value="15"
+        /></label>
+        <label
+          >Cycles <input id="cycles" type="number" min="1" value="4"
+        /></label>
+      </div>
+      <p class="chat-hint" style="text-align: center">
+        Tip: Adjust durations before starting. We’ll auto-switch between focus
+        and breaks.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %}
+<script src="/static/js/focus.js"></script>
+{% endblock %}
